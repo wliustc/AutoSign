@@ -5,8 +5,10 @@
 from http import cookiejar
 import requests
 from bs4 import BeautifulSoup
-
+from apscheduler.schedulers.blocking import BlockingScheduler
+import os
 import click
+from datetime import datetime
 
 HEADERS = {
     "Host": "www.nowcoder.com",
@@ -35,16 +37,18 @@ def login(email, password):
         print(i)
     session.cookies.save()
 
-@click.command()
-@click.option('--feel',prompt='今天的打卡心情是>',help='输入打卡内容')
-def dayfeel(feel):
+#@click.command()
+#@click.option('--feel',prompt='今天的打卡心情是>',help='输入打卡内容')
+def dayfeel():
     """
     每日打卡
     :param feel: 打卡内容
     :return: 打印打卡结果
     """
-    email = "185XXXXXXXX"
-    password = "XXXXXX"
+    feel = ('nowcoder打卡%s 加油每一天。gogogo!!' % datetime.now())
+    print(feel)
+    email = ""
+    password = ""
     login(email, password)
     dfurl = "https://www.nowcoder.com/clock/new?token="
     data = {
@@ -53,5 +57,14 @@ def dayfeel(feel):
     response = session.post(dfurl, data=data, headers=HEADERS)
     print(response.json())
 
+
+
 if __name__ == '__main__':
-    dayfeel()
+    scheduler = BlockingScheduler()
+    scheduler.add_job(dayfeel, 'cron', second='3',minute= '5',hour = '0')
+    print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
+        print('Exit The Job!')
