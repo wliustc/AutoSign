@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+
 import click
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -9,8 +10,8 @@ def getChangeStatus():
     获取变动的状态,有变动返回True,无变动返回False
     :return:True/False
     """
-    os.popen('git status -s > status.txt')
-    with open('status.txt','r',encoding = 'utf-8') as frst:
+    os.popen('git status -s > autocommit.log')
+    with open("autocommit.log", 'r', encoding='utf-8') as frst:
         if frst.readline() == '':
             return False
         else:
@@ -30,7 +31,10 @@ def CHeckPath(path):
     if os.path.isdir(gitpath) == False:
         print("该路径不是git路径")
         return False
-    print("每隔5分钟为您一次检查："+path)
+    print("每隔5分钟为您一次检查：" + path)
+    # 初始化log记录
+    with open("autocommit.log", 'w', encoding='utf-8') as f:
+        f.write("")
     return True
 
 
@@ -47,6 +51,7 @@ def GitScheduler():
     """
     scheduler = BlockingScheduler()
     scheduler.add_job(AutoGitCommit, 'cron', minute='*/5')
+    #scheduler.add_job(AutoGitCommit, 'cron', second='*/5')
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
     try:
         scheduler.start()
@@ -59,7 +64,7 @@ def PushOrginMaster():
     """
     提交到远程仓库
     """
-    os.system(' git push -u origin master')
+    os.system(' git push ')
 
 
 def AddCommit():
@@ -67,14 +72,14 @@ def AddCommit():
     更新文件修改信息添加commit
     """
     os.system('git add .')
-    os.popen('git status -s > status.txt')
-    rst=''
-    with open('status.txt','r',encoding = 'utf-8') as frst:
+    os.popen('git status -s > autocommit.log')
+    rst = ''
+    with open('autocommit.log', 'r', encoding='utf-8') as frst:
         rst = frst.read()
         print("修改内容如下：")
         print(rst)
     print("正在提交修改文本..")
-    os.system('git commit -m"{}"'.format(rst))
+    os.system('git commit -m "{}"'.format(rst))
 
 
 @click.command()
@@ -85,5 +90,5 @@ def main(gitpath):
 
 
 if __name__ == '__main__':
-   main()
-   ##AddCommit()
+    main()
+    # getChangeStatus()
