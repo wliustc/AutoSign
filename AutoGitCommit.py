@@ -9,11 +9,12 @@ def getChangeStatus():
     获取变动的状态,有变动返回True,无变动返回False
     :return:True/False
     """
-    rst = os.popen('git status -s').read()
-    if rst == '':
-        return False
-    else:
-        return True
+    os.popen('git status -s > status.txt')
+    with open('status.txt','r',encoding = 'utf-8') as frst:
+        if frst.readline() == '':
+            return False
+        else:
+            return True
 
 
 def CHeckPath(path):
@@ -29,6 +30,7 @@ def CHeckPath(path):
     if os.path.isdir(gitpath) == False:
         print("该路径不是git路径")
         return False
+    print("每隔5分钟为您一次检查："+path)
     return True
 
 
@@ -65,19 +67,23 @@ def AddCommit():
     更新文件修改信息添加commit
     """
     os.system('git add .')
-    rst = os.popen('git status -s').read()
-    print(rst)
+    os.popen('git status -s > status.txt')
+    rst=''
+    with open('status.txt','r',encoding = 'utf-8') as frst:
+        rst = frst.read()
+        print("修改内容如下：")
+        print(rst)
+    print("正在提交修改文本..")
     os.system('git commit -m"{}"'.format(rst))
 
 
 @click.command()
 @click.option('--gitpath', prompt='请输入自动提交的gitpath', help='自动commit，自动push to orgin master')
 def main(gitpath):
-    print(gitpath)
     if CHeckPath(gitpath):
         GitScheduler()
 
 
 if __name__ == '__main__':
-   ## main()
-   AddCommit()
+   main()
+   ##AddCommit()
