@@ -66,6 +66,7 @@ def AddCommit():
     """
     os.system('git add .')
     rst = os.popen('git status -s').read()
+    print(rst)
     os.system('git commit -m"{}"'.format(rst))
 
 
@@ -78,4 +79,5 @@ def main(gitpath):
 
 
 if __name__ == '__main__':
-    main()
+   ## main()
+   AddCommit()
